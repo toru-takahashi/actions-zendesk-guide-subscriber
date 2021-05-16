@@ -12,7 +12,7 @@ jobs:
       - id: last-execution
         name: Get the last execution time
         run: |
-          curl -fsSL -O https://api.github.com/repos/${{ github.actor }}/action-slack-zendesk-guide-updates/actions/workflows/main.yml/runs
+          curl -fsSL -O https://api.github.com/repos/${{ github.actor }}/actions-zendesk-guide-subscriber/actions/workflows/main.yml/runs
           LAST_RUN=$(jq -r '.workflow_runs | map(select(.status == "completed"))[0].created_at' runs)
           LAST_RUN=$(date -d $LAST_RUN +%s)
           echo "::set-output name=last_run_time::$LAST_RUN"
