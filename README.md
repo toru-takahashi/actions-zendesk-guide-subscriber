@@ -9,8 +9,8 @@ With ease:
 
 ## Get Started
 
-1 - Fork this repository to your repository
-2 - Register the following required actions secrets in your folked repo
+1. Fork this repository to your repository
+2. Register the following required actions secrets in your folked repo
 
 NOTE: An initial run may be failed because this action require a previou action execution time to get a diff
 
