@@ -1,0 +1,36 @@
+name: Notify Zendesk Guide Update to Slack
+
+on:
+  schedule:
+    - cron:  '*/15 * * * *'
+
+jobs:
+  zendesk_guide_slack_job:
+    runs-on: ubuntu-latest
+    name: Zendesk Guide to Slack
+    steps:
+      - id: last-execution
+        name: Get the last execution time
+        run: |
+          curl -fsSL -O https://api.github.com/repos/${{ secrets.GITHUB_USERNAME }/action-slack-zendesk-guide-updates/actions/workflows/main.yml/runs
+          LAST_RUN=$(jq -r '.workflow_runs | map(select(.status == "completed"))[0].created_at' runs)
+          LAST_RUN=$(date -d $LAST_RUN +%s)
+          echo "::set-output name=last_run_time::$LAST_RUN"
+          
+      - id: guide
+        name: Pull Guide update
+        run: |
+          ARTICLES=`curl -X GET -H 'Content-type: application/json; charset=utf-8' -u ${{ secrets.ZENDESK_EMAIL }}/token:${{ secrets.ZENDESK_TOKEN }} 'https://${{ secrets.ZENDESK_SUBDOMAIN }}.zendesk.com/api/v2/help_center/incremental/articles?start_time= ${{ steps.last-execution.outputs.last_run_time }}' | jq -r '.articles[] | [.title, .updated_at, .html_url] | @json'`
+          ARTICLES="${ARTICLES//$'\n'/\\n}"
+          ARTICLES=${ARTICLES//$'"'/}
+          echo "::set-output name=articles::$ARTICLES"
+
+      - id: slack
+        name: Notify Slack
+        run: |
+          if [ -z "${{ steps.guide.outputs.articles }}" ]; then
+            echo "No update"
+            exit 0
+          fi
+          curl -X POST -H "Content-type: application/json; charset=utf-8" -d "{'text': 'Recent Article Updates:\n${{ steps.guide.outputs.articles }}'}" ${{ secrets.SLACK_WEBHOOK }}
+
