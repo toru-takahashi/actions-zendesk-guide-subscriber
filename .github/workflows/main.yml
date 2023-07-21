@@ -15,7 +15,7 @@ jobs:
           curl -fsSL -O https://api.github.com/repos/${{ github.actor }}/actions-zendesk-guide-subscriber/actions/workflows/main.yml/runs
           LAST_RUN=$(jq -r '.workflow_runs | map(select(.status == "completed"))[0].created_at' runs)
           LAST_RUN=$(date -d $LAST_RUN +%s)
-          echo "::set-output name=last_run_time::$LAST_RUN"
+          echo "last_run_time=$LAST_RUN" >> $GITHUB_OUTPUT
           
       - id: guide
         name: Pull Guide update
@@ -23,7 +23,7 @@ jobs:
           ARTICLES=`curl -X GET -H 'Content-type: application/json; charset=utf-8' -u ${{ secrets.ZENDESK_EMAIL }}/token:${{ secrets.ZENDESK_TOKEN }} 'https://${{ secrets.ZENDESK_SUBDOMAIN }}.zendesk.com/api/v2/help_center/incremental/articles?start_time=${{ steps.last-execution.outputs.last_run_time }}' | jq -r '.articles[] | [.title, .updated_at, .html_url] | @json'`
           ARTICLES="${ARTICLES//$'\n'/\\n}"
           ARTICLES=${ARTICLES//$'"'/}
-          echo "::set-output name=articles::$ARTICLES"
+          echo "articles=$ARTICLES" >> $GITHUB_STATE
 
       - id: slack
         name: Notify Slack
