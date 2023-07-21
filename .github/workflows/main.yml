@@ -23,7 +23,7 @@ jobs:
           ARTICLES=`curl -X GET -H 'Content-type: application/json; charset=utf-8' -u ${{ secrets.ZENDESK_EMAIL }}/token:${{ secrets.ZENDESK_TOKEN }} 'https://${{ secrets.ZENDESK_SUBDOMAIN }}.zendesk.com/api/v2/help_center/incremental/articles?start_time=${{ steps.last-execution.outputs.last_run_time }}' | jq -r '.articles[] | [.title, .updated_at, .html_url] | @json'`
           ARTICLES="${ARTICLES//$'\n'/\\n}"
           ARTICLES=${ARTICLES//$'"'/}
-          echo "articles=$ARTICLES" >> $GITHUB_STATE
+          echo "articles=$ARTICLES" >> $GITHUB_OUTPUT
 
       - id: slack
         name: Notify Slack
