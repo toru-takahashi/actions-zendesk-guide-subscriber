@@ -1,8 +1,9 @@
 name: Notify Zendesk Guide Update to Slack
 
 on:
+  # UTCなので実際は朝9時の実行を期待
   schedule:
-    - cron:  '*/60 * * * *'
+    - cron: "0 0 * * *"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
