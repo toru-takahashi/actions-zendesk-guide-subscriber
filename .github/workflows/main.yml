@@ -35,5 +35,5 @@ jobs:
             echo "No update"
             exit 0
           fi
-          curl -X POST -H "Content-type: application/json; charset=utf-8" -d "{'text': 'Recent Article Updates:\n${{ steps.guide.outputs.articles }}'}" ${{ secrets.SLACK_WEBHOOK }}
+          curl -X POST -H "Content-type: application/json; charset=utf-8" -d "{'text': '更新された記事:\n${{ steps.guide.outputs.articles }}'}\n" ${{ secrets.SLACK_WEBHOOK }}
 
