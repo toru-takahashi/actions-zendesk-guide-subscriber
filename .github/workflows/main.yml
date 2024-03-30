@@ -1,12 +1,8 @@
 name: Notify Zendesk Guide Update to Slack
 
 on:
-  # UTCなので実際は朝9時の実行を期待
   schedule:
-    - cron: "0 0 * * *"
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+    - cron:  '*/60 * * * *'
 
 jobs:
   zendesk_guide_slack_job:
@@ -24,7 +20,7 @@ jobs:
       - id: guide
         name: Pull Guide update
         run: |
-          ARTICLES=`curl -X GET -H 'Content-type: application/json; charset=utf-8' -u ${{ secrets.ZENDESK_EMAIL }}/token:${{ secrets.ZENDESK_TOKEN }} 'https://${{ secrets.ZENDESK_SUBDOMAIN }}.zendesk.com/api/v2/help_center/incremental/articles?created_after=${{ steps.last-execution.outputs.last_run_time }}' | jq -r '.articles[] | [.title, .updated_at, .html_url] | @json'`
+          ARTICLES=`curl -X GET -H 'Content-type: application/json; charset=utf-8' -u ${{ secrets.ZENDESK_EMAIL }}/token:${{ secrets.ZENDESK_TOKEN }} 'https://${{ secrets.ZENDESK_SUBDOMAIN }}.zendesk.com/api/v2/help_center/incremental/articles?start_time=${{ steps.last-execution.outputs.last_run_time }}' | jq -r '.articles[] | [.title, .updated_at, .html_url] | @json'`
           ARTICLES="${ARTICLES//$'\n'/\\n}"
           ARTICLES=${ARTICLES//$'"'/}
           echo "articles=$ARTICLES" >> $GITHUB_OUTPUT
@@ -36,5 +32,5 @@ jobs:
             echo "No update"
             exit 0
           fi
-          curl -X POST -H "Content-type: application/json; charset=utf-8" -d "{'text': '更新された記事:\n${{ steps.guide.outputs.articles }}'}\n" ${{ secrets.SLACK_WEBHOOK }}
+          curl -X POST -H "Content-type: application/json; charset=utf-8" -d "{'text': 'Recent Article Updates:\n${{ steps.guide.outputs.articles }}'}" ${{ secrets.SLACK_WEBHOOK }}
 
